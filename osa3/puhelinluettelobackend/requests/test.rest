@@ -1,0 +1,19 @@
+GET https://fullstackopen-xhdx.onrender.com/api/persons
+
+###
+
+GET https://fullstackopen-xhdx.onrender.com/api/persons/1
+
+###
+
+POST https://fullstackopen-xhdx.onrender.com/api/persons/
+Content-Type: application/json
+
+{
+    "name":"Konsta Hirvonen",
+    "number":"040-1234567"
+}
+
+###
+
+DELETE https://fullstackopen-xhdx.onrender.com/api/persons/3
