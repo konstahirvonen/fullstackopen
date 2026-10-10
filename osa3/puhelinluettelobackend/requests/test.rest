@@ -17,3 +17,9 @@ Content-Type: application/json
 ###
 
 DELETE https://fullstackopen-xhdx.onrender.com/api/persons/3
+
+###
+GET http://localhost:3001/api/persons/6ac914ab8e979c9725054139
+
+###
+GET http://localhost:3001/info
