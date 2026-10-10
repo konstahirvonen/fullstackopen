@@ -79,6 +79,13 @@ const PersonForm = (props) => {
           props.setMessage(null)
         }, 5000)
       })
+      .catch(error => {
+        console.log(error.response.data)
+        props.setErrorMessage(`Person validation failed ${error.response.data.error}`)
+        setTimeout(() => {
+              props.setErrorMessage(null)
+            }, 5000)
+      })
   }
 
   return (
