@@ -5,6 +5,8 @@ const app = require("../app")
 const assert = require('node:assert')
 const Blog = require("../models/blog")
 const helper = require("./test_helper")
+const User = require("../models/user")
+const { userExtractor, tokenExtractor } = require("../utils/middleware")
 
 const api = supertest(app)
 
@@ -35,25 +37,60 @@ test("blog identifying field is id", async () => {
 })
 
 test("new blog added", async () => {
+
+    const user = {
+        username: "testUser",
+        password: "password"
+    }
+
+    await api.post("/api/users").send(user)
+
+    const testUser = await api
+        .post("/api/login")
+        .send({
+            username: "testUser",
+            password: "password"
+        })
+
+    const token = testUser.body.token
+
     const newBlog = {
         title: "test blog",
         author: "test",
         url: "testblog",
-        likes: 5
+        likes: 5,
     }
 
-    const blogi = await api
+    await api
         .post("/api/blogs")
+        .set("Authorization", `Bearer ${token}`)
         .send(newBlog)
         .expect(201)
         .expect("Content-Type", /application\/json/)
 
-        const response = await api.get("/api/blogs")
+    const response = await api.get("/api/blogs")
 
-        assert.strictEqual(response.body.length, helper.initialBlogs.length + 1)
+    assert.strictEqual(response.body.length, helper.initialBlogs.length + 1)
 })
 
 test("if likes is empty set value to 0", async () => {
+
+    const user = {
+        username: "testUser",
+        password: "password"
+    }
+
+    await api.post("/api/users").send(user)
+
+    const testUser = await api
+        .post("/api/login")
+        .send({
+            username: "testUser",
+            password: "password"
+        })
+
+    const token = testUser.body.token
+
     const newBlog = {
         title: "test blog2",
         author: "test2",
@@ -62,6 +99,7 @@ test("if likes is empty set value to 0", async () => {
 
     const response = await api
         .post("/api/blogs")
+        .set("Authorization", `Bearer ${token}`)
         .send(newBlog)
         .expect(201)
         .expect("Content-Type", /application\/json/)
@@ -70,29 +108,75 @@ test("if likes is empty set value to 0", async () => {
 })
 
 test("if title or url is empty response = 400 bad request", async () => {
+
+    const user = {
+        username: "testUser",
+        password: "password"
+    }
+
+    await api.post("/api/users").send(user)
+
+    const testUser = await api
+        .post("/api/login")
+        .send({
+            username: "testUser",
+            password: "password"
+        })
+
+    const token = testUser.body.token
+
     const newBlog = {}
 
     await api
         .post("/api/blogs")
+        .set("Authorization", `Bearer ${token}`)
         .send(newBlog)
         .expect(400)
         .expect("Content-Type", /application\/json/)
 })
 
 test("delete blog by id", async () => {
-    const blogsAtSTart = await helper.blogsInDb()
-    const blogsToDelete = blogsAtSTart[0]
+
+    const user = {
+        username: "testUser",
+        password: "password"
+    }
+
+    await api.post("/api/users").send(user)
+
+    const testUser = await api
+        .post("/api/login")
+        .send({
+            username: "testUser",
+            password: "password"
+        })
+
+    const token = testUser.body.token
+
+    const newBlog = {
+        title: "test blog2",
+        author: "test2",
+        url: "testblog1",
+    }
+
+    const blogResponse = await api
+        .post("/api/blogs")
+        .set("Authorization", `Bearer ${token}`)
+        .send(newBlog)
+        .expect(201)
+        .expect("Content-Type", /application\/json/)
+
+    const blogsToDelete = blogResponse.body
 
     await api
         .delete(`/api/blogs/${blogsToDelete.id}`)
+        .set("Authorization", `Bearer ${token}`)
         .expect(204)
 
     const blogsAtEnd = await helper.blogsInDb()
 
     const ids = blogsAtEnd.map(b => b.id)
     assert(!ids.includes(blogsToDelete.id))
-
-    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length - 1)
 })
 
 test("update likes on existing blog", async () => {

@@ -8,5 +8,93 @@ Content-Type: application/json
     "title":"Toinen postaus",
     "author":"Konsta Hirvonen",
     "url":"testi2",
+    "likes": 23,
+    "userId": "6acf493a2a919b8784ae70d0"
+}
+###
+
+POST http://localhost:3003/api/users
+Content-Type: application/json
+
+{
+    "username":"Konsta1",
+    "name":"Konsta2",
+    "password":"123"
+}
+
+###
+GET http://localhost:3003/api/users
+
+###
+
+POST http://localhost:3003/api/users
+Content-Type: application/json
+
+{
+    "username":"Ko",
+    "name":"",
+    "password":"12"
+}
+
+###
+POST http://localhost:3003/api/login
+Content-Type: application/json
+
+{
+    "username": "Konsta1",
+    "password": "123"
+}
+
+###
+POST http://localhost:3003/api/blogs
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IktvbnN0YTEiLCJpZCI6IjZhY2Y0OTNhMmE5MTliODc4NGFlNzBkMCIsImlhdCI6MTc5MTk3NzI1N30.GRH-o7GIsn8DfMuf43smmnDpfHGRSvvTMj5p-qzkmRE
+
+{
+    "title":"Postaus kirjautuneen",
+    "author":"Konsta Hirvonen",
+    "url":"testi2",
     "likes": 23
 }
+
+###
+DELETE http://localhost:3003/api/blogs/6acf673a66836718cb6bdc0b
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IktvbnN0YTEiLCJpZCI6IjZhY2Y0OTNhMmE5MTliODc4NGFlNzBkMCIsImlhdCI6MTc5MTk3NzI1N30.GRH-o7GIsn8DfMuf43smmnDpfHGRSvvTMj5p-qzkmRE
+
+###
+
+POST http://localhost:3003/api/users
+Content-Type: application/json
+
+{
+    "username":"Testi",
+    "name":"",
+    "password":"123"
+}
+
+###
+POST http://localhost:3003/api/login
+Content-Type: application/json
+
+{
+    "username": "Testi",
+    "password": "123"
+}
+
+###
+POST http://localhost:3003/api/blogs
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlRlc3RpIiwiaWQiOiI2YWNmNWVmMzZkYThmMzM3MzdiZWY3ZjciLCJpYXQiOjE3OTE5NzUyNDd9.zMebWLDAJCihKIIhWpLJop94ezkxdqNwQv2wwjENuBY
+
+{
+    "title":"Postaus kirjautuneena",
+    "author":"Testi",
+    "url":"testi2",
+    "likes": 23
+}
+
+###
+DELETE http://localhost:3003/api/blogs/6acf5f581abf77b5c163c24f
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IktvbnN0YTEiLCJpZCI6IjZhY2Y0OTNhMmE5MTliODc4NGFlNzBkMCIsImlhdCI6MTc5MTk3Mjc3Nn0.D0FroiwQ0Mh5SjKiEEQsS_75kCuD5L_D92gPIQThhlw
