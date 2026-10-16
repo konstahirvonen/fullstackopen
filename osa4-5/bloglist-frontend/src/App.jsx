@@ -13,10 +13,6 @@ const App = () => {
   const [user, setUser] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
   const [message, setMessage] = useState(null)
-  const [title, setTitle] = useState('')
-  const [author, setAuthor] = useState('')
-  const [url, setUrl] = useState('')
-  const [createBlogVisible, setCreateBlogVisible] = useState(false)
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -31,6 +27,19 @@ const App = () => {
       setUser(user)
     }
   }, [])
+
+  const createBlog = blogObject => {
+    blogService
+          .create(blogObject)
+          .then(returnedBlog => {
+            console.log('response')
+            setBlogs(blogs.concat(returnedBlog))
+            setMessage(`a new blog ${returnedBlog.title} by ${returnedBlog.author} added`)
+            setTimeout(() => {
+              setMessage(null)
+            }, 5000)
+          })
+  }
 
   const handleLogin = async e => {
     e.preventDefault()
@@ -76,18 +85,7 @@ const App = () => {
         <>
           <h2>blogs</h2>
           <p>{user.name} logged in <button onClick={handleLogout}>logout</button></p>
-          <NewBlogForm
-            title={title}
-            setTitle={setTitle}
-            author={author}
-            setAuthor={setAuthor}
-            url={url}
-            setUrl={setUrl}
-            createBlogVisible={createBlogVisible}
-            setCreateBlogVisible={setCreateBlogVisible}
-            setMessage={setMessage}
-            setBlogs={setBlogs}
-            blogs={blogs}
+          <NewBlogForm createBlog={createBlog}
           />
           <BlogForm
             blogs={blogs}

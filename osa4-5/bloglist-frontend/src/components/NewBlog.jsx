@@ -1,44 +1,29 @@
-import blogService from '../services/blogs'
+import { useState } from 'react'
 
 const NewBlogForm = ({
-  title,
-  setTitle,
-  author,
-  setAuthor,
-  url,
-  setUrl,
-  createBlogVisible,
-  setCreateBlogVisible,
-  setMessage,
-  setBlogs,
-  blogs
+  createBlog
 }) => {
 
+  const [title, setTitle] = useState('')
+  const [author, setAuthor] = useState('')
+  const [url, setUrl] = useState('')
+  const [createBlogVisible, setCreateBlogVisible] = useState(false)
   const hideWhenVisible = { display: createBlogVisible ? 'none' : '' }
   const showWhenVisible = { display: createBlogVisible ? '' : 'none' }
 
-  const createBlog = async (e) => {
+  const addBlog = (e) => {
     e.preventDefault()
 
-    const blogObject = {
+    createBlog({
       title: title,
       author: author,
       url: url
-    }
+    })
+ 
+    setTitle('')
+    setAuthor('')
+    setUrl('')
 
-    blogService
-      .create(blogObject)
-      .then(returnedBlog => {
-        console.log('response')
-        setBlogs(blogs.concat(returnedBlog))
-        setTitle('')
-        setAuthor('')
-        setUrl('')
-        setMessage(`a new blog ${returnedBlog.title} by ${returnedBlog.author} added`)
-        setTimeout(() => {
-          setMessage(null)
-        }, 5000)
-      })
     setCreateBlogVisible(false)
   }
 
@@ -48,7 +33,7 @@ const NewBlogForm = ({
         <button onClick={() => setCreateBlogVisible(true)}>create new blog</button>
       </div>
       <div style={showWhenVisible}>
-        <form onSubmit={createBlog}>
+        <form onSubmit={addBlog}>
           <h2>create new</h2>
           <div>
             <label>
