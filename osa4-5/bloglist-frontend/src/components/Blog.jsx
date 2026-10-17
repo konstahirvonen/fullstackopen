@@ -43,7 +43,7 @@ const Blog = ({ blog, setBlogs, blogs, user, updateLikes = blogService.updateLik
 
   return (
     <div style={blogStyle}>
-      <div>
+      <div data-testid="blog">
         {blog.title} {blog.author}
         <button onClick={() => setShowBlogInfo(!showBlogInfo)}>
           {showBlogInfo ? 'hide' : 'show'}
