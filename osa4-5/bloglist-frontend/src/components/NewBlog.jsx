@@ -1,15 +1,13 @@
-import { useState } from 'react'
+import { useState } from "react"
+import blogService from '../services/blogs'
+import { useNavigate } from "react-router-dom"
+import { Button, TextField } from "@mui/material"
 
-const NewBlogForm = ({
-  createBlog
-}) => {
-
+const NewBlogForm = ({ user, blogs, setBlogs, setMessage }) => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
-  const [createBlogVisible, setCreateBlogVisible] = useState(false)
-  const hideWhenVisible = { display: createBlogVisible ? 'none' : '' }
-  const showWhenVisible = { display: createBlogVisible ? '' : 'none' }
+  const navigate = useNavigate()
 
   const addBlog = (e) => {
     e.preventDefault()
@@ -23,52 +21,56 @@ const NewBlogForm = ({
     setTitle('')
     setAuthor('')
     setUrl('')
+    navigate("/")
+  }
 
-    setCreateBlogVisible(false)
+  const createBlog = blogObject => {
+    blogService
+          .create(blogObject)
+          .then(returnedBlog => {
+            console.log('response')
+            setBlogs(blogs.concat(returnedBlog))
+            setMessage({
+              text: `Blog "${returnedBlog.title}" by "${returnedBlog.author}" added`,
+              type: "success"
+            })
+            setTimeout(() => {
+              setMessage(null)
+            }, 5000)
+          })
   }
 
   return (
     <div>
-      <div style={hideWhenVisible}>
-        <button onClick={() => setCreateBlogVisible(true)}>create new blog</button>
-      </div>
-      <div style={showWhenVisible}>
-        <form onSubmit={addBlog}>
-          <h2>create new</h2>
-          <div>
-            <label>
-                title
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-                author
-              <input
-                type="text"
-                value={author}
-                onChange={(e) => setAuthor(e.target.value)}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-                url
-              <input
-                type="text"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-              />
-            </label>
-          </div>
-          <button type='submit'>create</button>
-        </form>
-        <button onClick={() => setCreateBlogVisible(false)}>cancel</button>
-      </div>
+
+      <form onSubmit={addBlog}>
+        <h2>create new</h2>
+        <div>
+          <TextField
+            label="title"
+            style={{ marginTop: 10 }}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </div>
+        <div>
+          <TextField
+            label="author"
+            style={{ marginTop: 10 }}
+            value={author}
+            onChange={(e) => setAuthor(e.target.value)}
+          />
+        </div>
+        <div>
+          <TextField
+            label="url"
+            style={{ marginTop: 10 }}
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+          />
+        </div>
+        <Button type='submit' variant="contained" style={{ marginTop: 10 }}>create</Button>
+      </form>
     </div>
   )
 }

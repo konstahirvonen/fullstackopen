@@ -2,6 +2,9 @@ import {render, screen} from "@testing-library/react"
 import Blog from "./Blog"
 import userEvent from "@testing-library/user-event"
 import NewBlogForm from "./NewBlog"
+import { MemoryRouter } from "react-router-dom"
+import BlogForm from "./BlogForm"
+import blogService from '../services/blogs'
 
 test("renders title and author nothing else by default", () => {
     const blog = {
@@ -15,7 +18,11 @@ test("renders title and author nothing else by default", () => {
         }
     }
 
-    render(<Blog blog={blog} blogs={{blog}} setBlogs={() => {}} />)
+    render(
+        <MemoryRouter>
+            <BlogForm blogs={[blog]} setBlogs={() => {}} />
+        </MemoryRouter>
+    )
 
     expect(screen.findByText("React patterns")).toBeDefined()
     expect(screen.findByText("Michael Chan")).toBeDefined()
@@ -25,7 +32,7 @@ test("renders title and author nothing else by default", () => {
     expect(screen.queryByText("testuser name")).toBeNull()
 })
 
-test("renders all info if show button is pressed", async () => {
+test("show info but no buttons if no user", async () => {
     const blog = {
         title: "React patterns",
         author: "Michael Chan",
@@ -38,17 +45,19 @@ test("renders all info if show button is pressed", async () => {
     }
 
 
-    render(<Blog blog={blog} blogs={{blog}} setBlogs={() => {}} />)
-
-    const user = userEvent.setup()
-    const button = await screen.findByText("show")
-    await user.click(button)
+    render(
+        <MemoryRouter>
+            <Blog blog={blog} blogs={{blog}} setBlogs={() => {}} user={null} />
+        </MemoryRouter>
+    )
 
     expect(screen.findByText("React patterns")).toBeDefined()
     expect(screen.findByText("Michael Chan")).toBeDefined()
     expect(screen.queryByText("example.com")).toBeDefined()
-    expect(screen.queryByText("5")).toBeDefined()
+    expect(screen.queryByText("2")).toBeDefined()
     expect(screen.queryByText("testuser name")).toBeDefined()
+    expect(screen.queryByRole("button", {name: "delete"})).toBeNull()
+    expect(screen.queryByRole("button", {name: "like"})).toBeNull()
 })
 
 test("test like button pressed 2 times", async () => {
@@ -63,19 +72,20 @@ test("test like button pressed 2 times", async () => {
         }
     }
 
-    const mockHandler = vi.fn()
-
-    render(<Blog blog={blog} blogs={[blog]} setBlogs={() => {}} updateLikes={mockHandler} />)
-
     const user = userEvent.setup()
-    const showbutton = screen.getByText("show")
-    await user.click(showbutton)
+    const mockHandler = vi.fn()
 
     mockHandler.mockResolvedValue({
         ...blog,
         id: '123',
         likes: 3
     })
+
+    render(
+        <MemoryRouter>
+            <Blog blog={blog} blogs={[blog]} setBlogs={() => {}} updateLikes={mockHandler} user={{username: "root", name: "root"}} />
+        </MemoryRouter>
+    )
 
     const likebutton = screen.getByText("like")
     await user.click(likebutton)
@@ -86,14 +96,19 @@ test("test like button pressed 2 times", async () => {
 
 test("test return correct response data after creating blog", async () => {
     const user = userEvent.setup()
-    const createBlog = vi.fn()
 
-    render(<NewBlogForm 
-        createBlog={createBlog}
-        />)
+    vi.spyOn(blogService, "create").mockResolvedValue({
+        id: "123",
+        title: "Test title",
+        author: "Test author",
+        url: "Testurl.com"
+    })
 
-    const createNewBlogButton = screen.getByText("create new blog")
-    await user.click(createNewBlogButton)
+    render(
+        <MemoryRouter>  
+            <NewBlogForm user={{username: "root", name: "root"}} blogs={[]} setBlogs={() => {}} />
+        </MemoryRouter>
+    )
 
     const titleInput = screen.getByLabelText("title")
     const authorInput = screen.getByLabelText("author")
@@ -103,13 +118,59 @@ test("test return correct response data after creating blog", async () => {
     await user.type(authorInput, "Test author")
     await user.type(urlInput, "Testurl.com")
 
-    const createButton = screen.getByText("create")
+    const createButton = screen.getByRole("button", {name: "create"})
     await user.click(createButton)
 
-    expect(createBlog.mock.calls).toHaveLength(1)
-    expect(createBlog.mock.calls[0][0]).toEqual({
+    expect(blogService.create.mock.calls).toHaveLength(1)
+    expect(blogService.create.mock.calls[0][0]).toEqual({
         title: "Test title",
         author: "Test author",
         url: "Testurl.com"
     })
+})
+
+test("show only like button to user who is not blog creator", async () => {
+    const blog = {
+        title: "React patterns",
+        author: "Michael Chan",
+        url: "example.com",
+        likes: 2,
+        user: {
+            username: "testuser",
+            name: "testuser name"
+        }
+    }
+
+
+    render(
+        <MemoryRouter>
+            <Blog blog={blog} blogs={{blog}} setBlogs={() => {}} user={{username: "root", name: "root"}} />
+        </MemoryRouter>
+    )
+
+    expect(screen.queryByRole("button", {name: "delete"})).toBeNull()
+    expect(screen.queryByRole("button", {name: "like"})).toBeDefined()
+})
+
+test("show delete button to creator", async () => {
+    const blog = {
+        title: "React patterns",
+        author: "Michael Chan",
+        url: "example.com",
+        likes: 2,
+        user: {
+            username: "testuser",
+            name: "testuser name"
+        }
+    }
+
+
+    render(
+        <MemoryRouter>
+            <Blog blog={blog} blogs={{blog}} setBlogs={() => {}} user={{username: "testuser", name: "testuser name"}} />
+        </MemoryRouter>
+    )
+
+    expect(screen.queryByRole("button", {name: "delete"})).toBeDefined()
+    expect(screen.queryByRole("button", {name: "like"})).toBeDefined()
 })

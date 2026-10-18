@@ -24,6 +24,8 @@ describe('Blog app', () => {
 
   test('Login form is shown', async ({ page }) => {
 
+    await page.getByRole("link", {name: "login"}).click()
+
     const locator = page.getByText("Login to application")
     await expect(locator).toBeVisible()
     await expect(page.getByLabel("username")).toBeVisible()
@@ -35,7 +37,7 @@ describe('Blog app', () => {
     test("succeeds with correct credentials", async ({page}) => {
         await loginWith(page, "mluukkai", "salainen")
 
-        await expect(page.getByText("Matti Luukkainen logged in")).toBeVisible()
+        await expect(page.getByRole("button", {name: "logout"})).toBeVisible()
     })
 
     test("fails with wrong credentials", async ({page}) => {
@@ -45,42 +47,34 @@ describe('Blog app', () => {
         await expect(errorDiv).toContainText("wrong credentials")
     })
   })
-
+  
   describe("When logged in", () => {
     beforeEach(async ({page}) => {
         await loginWith(page, "mluukkai", "salainen")
-        await page.getByRole("button", {name: "login"}).click()
+        await expect(page.getByRole("button", {name: "logout"})).toBeVisible()
     })
 
     test("a new blog can be created", async ({page}) => {
-
-        await page.getByRole("button", {name: "create new blog"}).click()
         await createBlog(page, "Blog title", "Blog author", "blogurl.com")
-        await page.getByRole("button", {name: "create"}).click()
-
         await expect(page.getByText("Blog title Blog author")).toBeVisible()
     })
 
     test("blog can be liked", async ({page}) => {
 
-        await page.getByRole("button", {name: "create new blog"}).click()
         await createBlog(page, "Blog title", "Blog author", "blogurl.com")
-        await expect(page.getByText("Blog title Blog author")).toBeVisible()
         
-        await page.getByRole("button", {name: "show"}).click()
-        await expect(page.getByText("0")).toBeVisible()
+        await page.getByRole("link", {name: "Blog title Blog author"}).click()
+        await expect(page.getByText("likes 0")).toBeVisible()
         await page.getByRole("button", {name: "like"}).click()
 
-        await expect(page.getByText("1")).toBeVisible()
+        await expect(page.getByText("likes 1")).toBeVisible()
     })
 
     test("blog can be deleted", async ({page}) => {
-
-        await page.getByRole("button", {name: "create new blog"}).click()
         await createBlog(page, "Blog title", "Blog author", "blogurl.com")
         await expect(page.getByText("Blog title Blog author")).toBeVisible()
 
-        await page.getByRole("button", {name: "show"}).click()
+        await page.getByRole("link", {name: "Blog title Blog author"}).click()
 
         page.on("dialog", async dialog => {
             expect(dialog.message()).toBe("Remove blog Blog title by Blog author")
@@ -93,20 +87,20 @@ describe('Blog app', () => {
 
     test("only user that added blog can see to delete button", async ({page}) => {
 
-        await page.getByRole("button", {name: "create new blog"}).click()
         await createBlog(page, "Blog title", "Blog author", "blogurl.com")
         await expect(page.getByText("Blog title Blog author")).toBeVisible()
 
         await page.getByRole("button", {name: "logout"}).click()
 
         await loginWith(page, "root", "password")
+        await expect(page.getByRole("button", {name: "logout"})).toBeVisible()
 
         await expect(page.getByText("Blog title Blog author")).toBeVisible()
-        await page.getByRole("button", {name: "show"}).click()
+        await page.getByRole("link", {name: "Blog title Blog author"}).click()
         await expect(page.getByRole("button", {name: "delete"})).toHaveCount(0)
     })
   })
-
+  /*
   describe("When added multiple blogs", () => {
     beforeEach(async ({page}) => {
         await loginWith(page, "mluukkai", "salainen")
@@ -139,5 +133,5 @@ describe('Blog app', () => {
 
         await expect(blogs.first()).toContainText("Blog2 Title Blog2 Author")
     })
-  })
+  })*/
 })

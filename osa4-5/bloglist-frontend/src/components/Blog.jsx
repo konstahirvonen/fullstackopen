@@ -1,20 +1,23 @@
 import { useState } from 'react'
 import blogService from '../services/blogs'
+import { Link, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
+import { Card, CardContent, Typography, Button, Box } from '@mui/material'
 
 const Blog = ({ blog, setBlogs, blogs, user, updateLikes = blogService.updateLikes }) => {
+  const id = useParams().id
+  const navigate = useNavigate()
 
-  const [showBlogInfo, setShowBlogInfo] = useState(false)
-
-  const blogStyle = {
-    paddingTop: 10,
-    paddingLeft: 2,
-    border: 'solid',
-    borderWidth: 1,
-    marginBottom: 5
+  if (!blog) {
+    return null
   }
 
   const handleLike = async (e) => {
     e.preventDefault()
+
+    if (!user) {
+      return null
+    }
 
     const blogObject = {
       title: blog.title,
@@ -38,28 +41,55 @@ const Blog = ({ blog, setBlogs, blogs, user, updateLikes = blogService.updateLik
       setBlogs(blogs =>
         blogs.filter(b => b.id !== blog.id)
       )
+      navigate("/")
     }
   }
 
   return (
-    <div style={blogStyle}>
-      <div data-testid="blog">
-        {blog.title} {blog.author}
-        <button onClick={() => setShowBlogInfo(!showBlogInfo)}>
-          {showBlogInfo ? 'hide' : 'show'}
-        </button>
-        {showBlogInfo && (
-          <div>
-            <p>{blog.title} {blog.author}</p>
-            <p>{blog.url}</p>
-            <p>{blog.likes} <button onClick={handleLike}>like</button> </p>
-            <p>{blog.user ? blog.user.name : ''}</p>
-            {user && blog.user && user.username === blog.user.username &&
-              <button onClick={removeBlog}>delete</button>
-            }
-          </div>
-        )}
-      </div>
+    <div data-testid="blog">
+      <Card sx={{mb: 2, maxWidth: 600}}>
+        <CardContent>
+
+          <Typography variant="h6">{blog.title}</Typography>
+
+          <Typography variant="subtitle1" sx={{ mb: 1 }}>by {blog.author}</Typography>
+
+          <Typography variant="body2" sx={{ mb: 1 }}>
+            <Link href={blog.url}>
+              {blog.url}
+            </Link>
+          </Typography>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+            <Typography>
+              Likes: {blog.likes}
+            </Typography>
+
+            {user && (
+              <Button variant="outlined" size="small" onClick={handleLike}>
+                Like
+              </Button>
+            )}
+          </Box>
+
+          <Typography variant="body2" color="text.secondary">
+            Added by: {blog.user ? blog.user.name : ''}
+          </Typography>
+
+          {user && blog.user && user.username === blog.user.username && (
+            <Button
+              variant="contained"
+              color="error"
+              size="small"
+              onClick={removeBlog}
+              sx={{ mt: 2 }}
+            >
+              Delete
+            </Button>
+          )}
+
+        </CardContent>
+      </Card>
     </div>
   )
 }
